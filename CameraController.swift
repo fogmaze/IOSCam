@@ -58,12 +58,7 @@ extension CameraController {
             var i = 0
             for format in dev.formats {
                 print("n = " + i)
-                for range in format.VideoSupportedFrameRateRanges{
-                    
-                    
-                }
-                
-                
+                print(format.videoFrameRateRangeForCenterStage.maxFrameRate)
             }
         }
         
