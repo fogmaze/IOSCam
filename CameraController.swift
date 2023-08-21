@@ -56,9 +56,11 @@ extension CameraController {
             }
             var dev = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
             var i = 0
-            for format in dev.formats {
+            for format in dev?.formats {
                 print("n = " + i)
-                print(format.videoFrameRateRangeForCenterStage.maxFrameRate)
+                for range in format.videoSupportedFrameRateRanges {
+                    print(range)
+                }
             }
         }
         
