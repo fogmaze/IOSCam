@@ -18,6 +18,7 @@ class CameraController: NSObject {
     var frontCameraInput: AVCaptureDeviceInput?
     
     var photoOutput: AVCapturePhotoOutput?
+    var videoOutput: AVCaptureVideoDataOutput?
     
     var rearCamera: AVCaptureDevice?
     var rearCameraInput: AVCaptureDeviceInput?
@@ -48,11 +49,21 @@ extension CameraController {
                 
                 if camera.position == .back {
                     self.rearCamera = camera
-                    
                     try camera.lockForConfiguration()
                     camera.focusMode = .continuousAutoFocus
                     camera.unlockForConfiguration()
                 }
+            }
+            var dev = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back)
+            var i = 0
+            for format in dev.formats {
+                print("n = " + i)
+                for range in format.VideoSupportedFrameRateRanges{
+                    
+                    
+                }
+                
+                
             }
         }
         
@@ -78,7 +89,15 @@ extension CameraController {
                 
             else { throw CameraControllerError.noCamerasAvailable }
         }
-        
+        func configureVideoOutput() throws {
+            guard let captureSession = self.captureSession else { throw CameraControllerError.captureSessionIsMissing }
+            
+            self.videoOutput = AVCaptureVideoDataOutput()
+            self.videoOutput!.setSampleBufferDelegate(self, queue: DispatchQueue(label: "com.appcoda.avdemo.frameGetter"))
+            if captureSession.canAddOutput(self.videoOutput!) { captureSession.addOutput(self.videoOutput!) }
+            else { throw CameraControllerError.inputsAreInvalid }
+        }
+    
         func configurePhotoOutput() throws {
             guard let captureSession = self.captureSession else { throw CameraControllerError.captureSessionIsMissing }
             
@@ -95,6 +114,7 @@ extension CameraController {
                 try configureCaptureDevices()
                 try configureDeviceInputs()
                 try configurePhotoOutput()
+                try configureVideoOutput()
             }
                 
             catch {
@@ -113,7 +133,7 @@ extension CameraController {
     
     func displayPreview(on view: UIView) throws {
         guard let captureSession = self.captureSession, captureSession.isRunning else { throw CameraControllerError.captureSessionIsMissing }
-        
+
         self.previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         self.previewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
         self.previewLayer?.connection?.videoOrientation = .portrait
@@ -186,6 +206,12 @@ extension CameraController {
         self.photoCaptureCompletionBlock = completion
     }
 
+}
+
+extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
+    public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        print("et Frame")
+    }
 }
 
 extension CameraController: AVCapturePhotoCaptureDelegate {

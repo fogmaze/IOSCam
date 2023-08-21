@@ -32,6 +32,11 @@ class ViewController: UIViewController {
 
 extension ViewController {
     override func viewDidLoad() {
+        print("viewDidLoad")
+        
+        DispatchQueue(label: "TestForPrinting").sync {
+            print("from outside")
+        }
         
         func configureCameraController() {
             cameraController.prepare {(error) in
